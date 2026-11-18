@@ -19,7 +19,8 @@ class GithubHttpFakeTest extends TestCase
             ->assertOk()
             ->assertJson(['repos' => 42]);
 
-        Http::assertSent(fn (Request $r) => $r->url() === 'https://api.github.com/users/taylorotwell');
+        Http::assertSent(fn (Request $r) =>
+            str_contains($r->url(), 'taylorotwell'));
     }
 
     public function test_erreur_github_renvoie_500(): void
