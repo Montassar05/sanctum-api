@@ -1,6 +1,10 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\GithubController;
+use App\Http\Controllers\PostController;
+use App\Http\Controllers\RegisterController;
+use App\Jobs\ExportPosts;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -22,6 +26,25 @@ Route::middleware('auth:sanctum')
 
 Route::middleware('auth:sanctum')
     ->post('/logout', [AuthController::class, 'logout']);
+
+Route::post('/register', RegisterController::class);
+
+Route::get('/posts', [PostController::class, 'index']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/posts', [PostController::class, 'store']);
+    Route::put('/posts/{post}', [PostController::class, 'update']);
+    Route::delete('/posts/{post}', [PostController::class, 'destroy']);
+
+    // L'export part en queue : réponse 202 immédiate.
+    Route::post('/exports', function (Request $r) {
+        ExportPosts::dispatch($r->user());
+
+        return response()->json(['status' => 'en cours'], 202);
+    });
+});
+
+Route::get('/github/{username}', [GithubController::class, 'repos']);
 
 // Calculé une fois, puis servi depuis le cache pendant 10 minutes.
 Route::get('/stats', fn () => [
