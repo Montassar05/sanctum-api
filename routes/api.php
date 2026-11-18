@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Resources\UserResource;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 
 // 5 tentatives de login par minute, puis 429.
@@ -20,3 +22,11 @@ Route::middleware('auth:sanctum')
 
 Route::middleware('auth:sanctum')
     ->post('/logout', [AuthController::class, 'logout']);
+
+// Calculé une fois, puis servi depuis le cache pendant 10 minutes.
+Route::get('/stats', fn () => [
+    'users' => Cache::remember(
+        'stats.users', 600,
+        fn () => User::count()
+    ),
+]);
