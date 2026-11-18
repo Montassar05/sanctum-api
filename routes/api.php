@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -11,6 +12,11 @@ Route::post('/login', [
 
 Route::middleware('auth:sanctum')
     ->get('/user', fn (Request $r) => $r->user());
+
+// Uniquement les champs choisis : id, name, email.
+Route::middleware('auth:sanctum')
+    ->get('/me', fn (Request $r)
+        => new UserResource($r->user()));
 
 Route::middleware('auth:sanctum')
     ->post('/logout', [AuthController::class, 'logout']);
