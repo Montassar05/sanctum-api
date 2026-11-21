@@ -18,6 +18,6 @@ class PublishedScopeTest extends TestCase
 
         $this->assertCount(2, Post::published()->get());
 
-        $this->getJson('/api/posts')->assertJsonCount(2);
+        $this->getJson('/api/posts')->assertJsonCount(2, 'data');
     }
 }

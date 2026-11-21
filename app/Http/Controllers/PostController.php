@@ -11,7 +11,10 @@ class PostController extends Controller
 {
     public function index()
     {
-        return Post::published()->latest('published_at')->get();
+        // 15 posts par page, jamais toute la table.
+        return Post::published()
+            ->latest('published_at')
+            ->paginate(15);
     }
 
     public function store(StorePostRequest $request)
@@ -39,5 +42,14 @@ class PostController extends Controller
         $post->delete(); // soft delete : deleted_at est rempli
 
         return response()->noContent();
+    }
+
+    public function publish(Post $post)
+    {
+        Gate::authorize('update', $post);
+
+        $post->update(['published_at' => now()]);
+
+        return $post;
     }
 }

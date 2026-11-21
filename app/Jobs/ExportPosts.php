@@ -15,12 +15,16 @@ class ExportPosts implements ShouldQueue
 
     public function handle(): void
     {
-        $csv = $this->user->posts()
-            ->get(['id', 'title'])
-            ->map(fn ($p) => "{$p->id};{$p->title}")
-            ->prepend('id;title')
-            ->implode("\n");
+        $path = "exports/user-{$this->user->id}.csv";
+        Storage::put($path, 'id;title');
 
-        Storage::put("exports/user-{$this->user->id}.csv", $csv);
+        // Par paquets de 500 : la mémoire reste plate,
+        // même avec 100 000 posts.
+        $this->user->posts()
+            ->select(['id', 'title'])
+            ->lazyById(500)
+            ->each(fn ($p) => Storage::append(
+                $path, "{$p->id};{$p->title}"
+            ));
     }
 }

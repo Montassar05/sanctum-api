@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\GithubController;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RegisterController;
 use App\Jobs\ExportPosts;
 use App\Http\Resources\UserResource;
@@ -35,6 +36,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/posts', [PostController::class, 'store']);
     Route::put('/posts/{post}', [PostController::class, 'update']);
     Route::delete('/posts/{post}', [PostController::class, 'destroy']);
+
+    // Le token doit avoir la permission posts:publish.
+    Route::post('/posts/{post}/publish', [
+        PostController::class, 'publish',
+    ])->middleware('abilities:posts:publish');
+
+    Route::put('/me', [ProfileController::class, 'update']);
 
     // L'export part en queue : réponse 202 immédiate.
     Route::post('/exports', function (Request $r) {
